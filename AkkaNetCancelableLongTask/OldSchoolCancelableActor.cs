@@ -1,21 +1,21 @@
 ﻿using Akka.Actor;
+using AkkaNetCancelableLongTask.Messages;
 using System;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("AkkaNetCancelableLongTask.Tests")]
 
 namespace AkkaNetCancelableLongTask
 {
-    internal class CancelableActor : ReceiveActor
+    internal class OldSchoolCancelableActor : ReceiveActor
     {
-        public CancelableActor()
+        public OldSchoolCancelableActor()
         {
             ReceiveAsync<CancelableMessage>(Handle);
         }
 
-        public static Props Props() => Akka.Actor.Props.Create(() => new CancelableActor());
+        public static Props Props() => Akka.Actor.Props.Create(() => new OldSchoolCancelableActor());
 
         private async Task Handle(CancelableMessage msg)
         {
@@ -26,16 +26,20 @@ namespace AkkaNetCancelableLongTask
             {
                 // ActorContext 가 없으므로 캡쳐한 sender와 self를 사용해야 한다.
                 sender.Tell(new RecievedMessage(), self);
-                msg.Action?.Invoke();
+
+                if (msg.MakeExeption)
+                {
+                    throw new Exception("4945A183-B63B-4533-B7A2-C918983BE394");
+                }
+
                 await Task.Delay(msg.LongTaskExcuteTime, msg.CancellationToken);
             }, msg.CancellationToken)
-            .ContinueWith(async task =>
+            .ContinueWith(task =>
             {
-                await Task.Delay(0).ConfigureAwait(false);
                 switch (task)
                 {
                     case var s when s.IsFaulted == true:
-                        Sender.Tell(new TaskFault(s.Exception));
+                        Sender.Tell(new TaskFaultOldSchool(s.Exception));
                         break;
 
                     case var s when s.IsCompletedSuccessfully == true:
@@ -49,31 +53,7 @@ namespace AkkaNetCancelableLongTask
                     default:
                         break;
                 }
-                
             });
         }
-    }
-
-    internal class CancelableMessage
-    {
-        public Action Action { get; set; }
-        public CancellationToken CancellationToken { get; set; }
-        public TimeSpan LongTaskExcuteTime { get; set; }
-    }
-
-    internal class RecievedMessage { }
-
-    internal class TaskCanceled { }
-
-    internal class TaskComplete { }
-
-    internal class TaskFault
-    {
-        public TaskFault(AggregateException exception)
-        {
-            Exception = exception;
-        }
-
-        public AggregateException Exception { get; set; }
     }
 }
