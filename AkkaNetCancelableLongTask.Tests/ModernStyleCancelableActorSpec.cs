@@ -88,7 +88,7 @@ pinned-dispatcher {
             var msg = new CancelableMessage
             {
                 CancellationToken = cts.Token,
-                LongTaskExcuteTime = 0.Seconds(),
+                LongTaskExcuteTime = 1.Seconds(),
             };
 
             targetActor.Tell(msg, TestActor);
