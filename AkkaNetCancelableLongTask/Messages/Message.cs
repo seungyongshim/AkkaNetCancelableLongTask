@@ -17,23 +17,13 @@ namespace AkkaNetCancelableLongTask.Messages
 
     internal class TaskComplete { }
 
-    internal class TaskFaultModernStyle
+    internal class TaskFault
     {
-        public TaskFaultModernStyle(Exception ex)
+        public TaskFault(Exception ex)
         {
             Exception = ex;
         }
 
         public Exception Exception { get; set; }
-    }
-
-    internal class TaskFaultOldSchool
-    {
-        public TaskFaultOldSchool(AggregateException exception)
-        {
-            Exception = exception;
-        }
-
-        public AggregateException Exception { get; set; }
     }
 }

@@ -48,7 +48,7 @@ namespace AkkaNetCancelableLongTask
             }
             catch (Exception ex)
             {
-                Sender.Tell(new TaskFaultModernStyle(ex), Self);
+                Sender.Tell(new TaskFault(ex), Self);
             }
         }
     }

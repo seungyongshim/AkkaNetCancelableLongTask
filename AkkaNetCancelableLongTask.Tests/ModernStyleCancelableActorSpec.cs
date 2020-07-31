@@ -46,7 +46,7 @@ pinned-dispatcher {
             var msg = new CancelableMessage
             {
                 CancellationToken = cts.Token,
-                LongTaskExcuteTime = 2.Seconds(),
+                LongTaskExcuteTime = 0.Seconds(),
             };
 
             // Act
@@ -54,9 +54,7 @@ pinned-dispatcher {
 
             // Assert
             ExpectMsg<RecievedMessage>();
-            ExpectMsg<TaskComplete>((m, s) =>
-                s.Path.Should().Be(targetActor.Path)
-            , 3.Seconds());
+            ExpectMsg<TaskComplete>((m, s) => s.Path.Should().Be(targetActor.Path));
         }
 
         [Fact]
@@ -77,11 +75,9 @@ pinned-dispatcher {
 
             // Assert
             ExpectMsg<RecievedMessage>();
-            ExpectMsg<TaskFaultModernStyle>(m => m.Exception
-                                                  .Message
-                                                  .Should()
-                                                  .Be("84A5F0CD-05CC-49D4-9FD2-A530A15A8A60"),
-            3.Seconds());
+            ExpectMsg<TaskFault>(m => m.Exception.Message
+                                                 .Should()
+                                                 .Be("84A5F0CD-05CC-49D4-9FD2-A530A15A8A60"));
         }
 
         [Fact] 
@@ -92,7 +88,7 @@ pinned-dispatcher {
             var msg = new CancelableMessage
             {
                 CancellationToken = cts.Token,
-                LongTaskExcuteTime = 2.Seconds(),
+                LongTaskExcuteTime = 0.Seconds(),
             };
 
             targetActor.Tell(msg, TestActor);
